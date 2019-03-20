@@ -59,8 +59,7 @@ class PageHealthExtension extends DataExtension
     public function getRenderedHtml()
     {
         if (!$this->renderedHtml) {
-            $controllerName = $this->owner->getControllerName();
-            $this->renderedHtml = $controllerName::singleton()->render($this->owner);
+            $this->renderedHtml = $this->owner->Me();
         }
 
         if ($this->renderedHtml === false) {
