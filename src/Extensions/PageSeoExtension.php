@@ -14,6 +14,7 @@ use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
+use SilverStripe\SiteConfig\SiteConfig;
 use Vulcan\Seo\Builders\FacebookMetaGenerator;
 use Vulcan\Seo\Builders\TwitterMetaGenerator;
 use Vulcan\Seo\Seo;
@@ -105,7 +106,14 @@ class PageSeoExtension extends DataExtension
      */
     public function MetaTags(&$tags)
     {
+        $siteConfig = SiteConfig::current_site_config();
         $tags = explode(PHP_EOL, $tags);
+		for($i = 0; $i < count($tags); $i++){
+			if(($pos = strpos($tags[$i], '</title>')) !== false){
+				$tags[$i] = substr_replace($tags[$i], ' '.$siteConfig->TitleTagEnding, $pos, 0);
+				break;
+			}
+		}
         $tags = array_merge(
             $tags,
             Seo::getCanonicalUrlLink($this->getOwner()),

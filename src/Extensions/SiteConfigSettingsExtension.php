@@ -29,7 +29,8 @@ class SiteConfigSettingsExtension extends DataExtension
         'FacebookPixel'      => 'Text',
         'TwitterPixel'       => 'Text',
         'SnapPixel'          => 'Text',
-        'TwitterAccountName' => 'Varchar(80)'
+        'TwitterAccountName' => 'Varchar(80)',
+        'TitleTagEnding' => 'Varchar(255)'
     ];
 
     private static $casting = [
@@ -45,7 +46,8 @@ class SiteConfigSettingsExtension extends DataExtension
         $snPixelHelp = 'https://businesshelp.snapchat.com/en-US/article/snap-pixel';
         $gaHelp = 'https://support.google.com/analytics/answer/1008080?hl=en';
 
-        $fields->addFieldsToTab('Root.VulcanSEO', [
+        $fields->addFieldsToTab('Root.SEO', [
+            TextField::create('TitleTagEnding'),
             TextField::create('TwitterAccountName'),
             TextareaField::create('GoogleAnalytics', 'Google Analytics')->setRightTitle($this->getHelpLink($gaHelp)),
             ToggleCompositeField::create(null, 'Pixels', [
