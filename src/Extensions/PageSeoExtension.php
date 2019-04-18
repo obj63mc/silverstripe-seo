@@ -41,7 +41,8 @@ class PageSeoExtension extends DataExtension
         'FacebookPageTitle'       => 'Varchar(255)',
         'FacebookPageDescription' => 'Text',
         'TwitterPageTitle'        => 'Varchar(255)',
-        'TwitterPageDescription'  => 'Text'
+        'TwitterPageDescription'  => 'Text',
+        'StructuredData' => 'HTMLText'
     ];
 
     private static $has_one = [
@@ -84,6 +85,7 @@ class PageSeoExtension extends DataExtension
     {
         parent::updateCMSFields($fields);
 
+        $fields->addFieldsToTab('Root.Main', TextareaField::create('StructuredData'), 'ExtraMeta');
         $fields->addFieldsToTab('Root.Main', [
             ToggleCompositeField::create('FacebookSeoComposite', 'Facebook SEO', [
                 DropdownField::create('FacebookPageType', 'Type', FacebookMetaGenerator::getValidTypes()),
@@ -121,7 +123,8 @@ class PageSeoExtension extends DataExtension
             Seo::getTwitterMetaTags($this->getOwner()),
             Seo::getArticleTags($this->getOwner()),
             Seo::getGoogleAnalytics(),
-            Seo::getPixels()
+            Seo::getPixels(),
+            [$this->owner->StructuredData]
         );
 
         $tags = implode(PHP_EOL, $tags);
