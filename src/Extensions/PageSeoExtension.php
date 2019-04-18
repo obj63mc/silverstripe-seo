@@ -86,6 +86,7 @@ class PageSeoExtension extends DataExtension
         parent::updateCMSFields($fields);
 
         $fields->addFieldsToTab('Root.Main', TextareaField::create('StructuredData'), 'ExtraMeta');
+
         $fields->addFieldsToTab('Root.Main', [
             ToggleCompositeField::create('FacebookSeoComposite', 'Facebook SEO', [
                 DropdownField::create('FacebookPageType', 'Type', FacebookMetaGenerator::getValidTypes()),
