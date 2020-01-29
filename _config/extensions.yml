@@ -4,7 +4,6 @@ Name: silverstripe-seo
 
 Page:
   extensions:
-    - Vulcan\Seo\Extensions\PageHealthExtension
     - Vulcan\Seo\Extensions\PageSeoExtension
 
 SilverStripe\SiteConfig\SiteConfig:
