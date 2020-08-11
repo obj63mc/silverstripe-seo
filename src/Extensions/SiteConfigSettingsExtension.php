@@ -2,10 +2,12 @@
 
 namespace Vulcan\Seo\Extensions;
 
+use SilverStripe\AssetAdmin\Forms\UploadField;
+use SilverStripe\Assets\Image;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\TextField;
+use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\ORM\FieldType\DBHTMLText;
@@ -33,6 +35,10 @@ class SiteConfigSettingsExtension extends DataExtension
         'TitleTagEnding' => 'Varchar(255)'
     ];
 
+    private static $has_one = [
+        'DefaultShareImage' => Image::class
+    ];
+
     private static $casting = [
         'GoogleAnalytics' => 'HTMLText'
     ];
@@ -48,6 +54,7 @@ class SiteConfigSettingsExtension extends DataExtension
 
         $fields->addFieldsToTab('Root.SEO', [
             TextField::create('TitleTagEnding'),
+            UploadField::create('DefaultShareImage'),
             TextField::create('TwitterAccountName'),
             TextareaField::create('GoogleAnalytics', 'Google Analytics')->setRightTitle($this->getHelpLink($gaHelp)),
             ToggleCompositeField::create(null, 'Pixels', [

@@ -86,10 +86,20 @@ class Seo
      */
     public static function getTwitterMetaTags($owner)
     {
+        $siteConfig = SiteConfig::current_site_config();
         $generator = TwitterMetaGenerator::create();
-        $generator->setTitle($owner->FacebookPageTitle ?: $owner->Title);
-        $generator->setDescription($owner->FacebookPageDescription ?: $owner->MetaDescription ?: $owner->Content);
-        $generator->setImageUrl(($owner->FacebookPageImage()->exists()) ? $owner->FacebookPageImage()->AbsoluteLink() : null);
+        $generator->setTitle($owner->TwitterPageTitle ?: $owner->Title);
+        $generator->setDescription($owner->TwitterPageDescription ?: $owner->MetaDescription ?: $owner->Content);
+        if($owner->TwitterPageImage()->exists()){
+            $generator->setImageUrl($owner->TwitterPageImage()->AbsoluteLink());
+        } else if($owner->FacebookPageImage()->exists()){
+            $generator->setImageUrl($owner->FacebookPageImage()->AbsoluteLink());
+        } else if($siteConfig->DefaultShareImage()->exists()){
+            $generator->setImageUrl($siteConfig->DefaultShareImage()->AbsoluteLink());
+        } else {
+            $generator->setImageUrl(null);
+        }
+
 
         if (PageSeoExtension::config()->get('enable_creator_tag') && $owner->Creator()->exists() && $owner->Creator()->TwitterAccountName) {
             $generator->setCreator($owner->Creator()->TwitterAccountName);
@@ -107,13 +117,22 @@ class Seo
      */
     public static function getFacebookMetaTags($owner)
     {
+        $siteConfig = SiteConfig::current_site_config();
         $imageWidth = $owner->FacebookPageImage()->exists() ? $owner->FacebookPageImage()->getWidth() : null;
         $imageHeight = $owner->FacebookPageImage()->exists() ? $owner->FacebookPageImage()->getHeight() : null;
 
         $generator = FacebookMetaGenerator::create();
         $generator->setTitle($owner->FacebookPageTitle ?: $owner->Title);
         $generator->setDescription($owner->FacebookPageDescription ?: $owner->MetaDescription ?: $owner->Content);
-        $generator->setImageUrl(($owner->FacebookPageImage()->exists()) ? $owner->FacebookPageImage()->AbsoluteLink() : null);
+        if($owner->FacebookPageImage()->exists()){
+            $generator->setImageUrl($owner->FacebookPageImage()->AbsoluteLink());
+        } else if($owner->TwitterPageImage()->exists()){
+            $generator->setImageUrl($owner->TwitterPageImage()->AbsoluteLink());
+        } else if($siteConfig->DefaultShareImage()->exists()){
+            $generator->setImageUrl($siteConfig->DefaultShareImage()->AbsoluteLink());
+        } else {
+            $generator->setImageUrl(null);
+        }
         $generator->setImageDimensions($imageWidth, $imageHeight);
         $generator->setType($owner->FacebookPageType ?: 'website');
         $generator->setUrl($owner->AbsoluteLink());
