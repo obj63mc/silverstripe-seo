@@ -1,20 +1,20 @@
 <?php
 
-namespace Vulcan\Seo;
+namespace QuinnInteractive\Seo;
 
+use QuinnInteractive\Seo\Builders\FacebookMetaGenerator;
+use QuinnInteractive\Seo\Builders\TwitterMetaGenerator;
+use QuinnInteractive\Seo\Extensions\PageHealthExtension;
+use QuinnInteractive\Seo\Extensions\PageSeoExtension;
+use QuinnInteractive\Seo\Extensions\SiteConfigSettingsExtension;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\SiteConfig\SiteConfig;
-use Vulcan\Seo\Builders\FacebookMetaGenerator;
-use Vulcan\Seo\Builders\TwitterMetaGenerator;
-use Vulcan\Seo\Extensions\PageHealthExtension;
-use Vulcan\Seo\Extensions\PageSeoExtension;
-use Vulcan\Seo\Extensions\SiteConfigSettingsExtension;
 
 /**
  * Class Seo
- * @package Vulcan\Seo
+ * @package QuinnInteractive\Seo
  */
 class Seo
 {
@@ -78,6 +78,7 @@ class Seo
     }
 
     /**
+<<<<<<< HEAD
      * Creates the twitter meta tags
      *
      * @param \Page|PageSeoExtension|Object $owner
@@ -109,6 +110,8 @@ class Seo
     }
 
     /**
+=======
+>>>>>>> upstream/master
      * Creates the Facebook/OpenGraph meta tags
      *
      * @param \Page|PageSeoExtension|Object $owner
@@ -141,30 +144,6 @@ class Seo
     }
 
     /**
-     * Get all PixelFields
-     * @return array
-     */
-    public static function getPixels()
-    {
-        $output = [];
-        $siteConfig = SiteConfig::current_site_config();
-        $ours = array_keys(SiteConfigSettingsExtension::config()->get('db'));
-        $db = SiteConfig::config()->get('db');
-
-        foreach ($db as $k => $v) {
-            if (strstr($k, 'Pixel') && in_array($k, $ours)) {
-                if (is_null($siteConfig->{$k})) {
-                    continue;
-                }
-
-                $output[] = $siteConfig->{$k};
-            }
-        }
-
-        return $output;
-    }
-
-    /**
      * @return array
      */
     public static function getGoogleAnalytics()
@@ -173,5 +152,51 @@ class Seo
         $sc = SiteConfig::current_site_config();
 
         return ($sc->GoogleAnalytics) ? [$sc->GoogleAnalytics] : [];
+    }
+
+    /**
+     * Get all PixelFields
+     * @return array
+     */
+    public static function getPixels()
+    {
+        $output     = [];
+        $siteConfig = SiteConfig::current_site_config();
+        $ours       = array_keys(SiteConfigSettingsExtension::config()->get('db'));
+        $db         = SiteConfig::config()->get('db');
+        foreach ($db as $k => $v) {
+            if (strstr($k, 'Pixel') && in_array($k, $ours)) {
+                if (is_null($siteConfig->{$k})) {
+                    continue;
+                }
+                $output[] = $siteConfig->{$k};
+            }
+        }
+
+        return $output;
+    }
+
+    /**
+     * Creates the twitter meta tags
+     *
+     * @param \Page|PageSeoExtension|Object $owner
+     *
+     * @return array
+     */
+    public static function getTwitterMetaTags($owner)
+    {
+        $generator = TwitterMetaGenerator::create();
+        $generator->setTitle($owner->FacebookPageTitle ?: $owner->Title);
+        $generator->setDescription($owner->TwitterPageDescription ?: $owner->MetaDescription ?: $owner->Content);
+        $generator->setImageUrl(($owner->TwitterPageImage()->exists())
+            ? $owner->TwitterPageImage()->AbsoluteLink()
+            : null);
+        if (PageSeoExtension::config()->get('enable_creator_tag') &&
+            $owner->Creator()->exists() &&
+            $owner->Creator()->TwitterAccountName) {
+            $generator->setCreator($owner->Creator()->TwitterAccountName);
+        }
+
+        return $generator->process();
     }
 }

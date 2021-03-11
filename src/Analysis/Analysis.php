@@ -1,21 +1,23 @@
 <?php
 
-namespace Vulcan\Seo\Analysis;
+namespace QuinnInteractive\Seo\Analysis;
 
+use KubAT\PhpSimple\HtmlDomParser;
+use QuinnInteractive\Seo\Extensions\PageHealthExtension;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\View\ArrayData;
-use KubAT\PhpSimple\HtmlDomParser;
-use Vulcan\Seo\Extensions\PageHealthExtension;
 
 /**
  * Class Analysis
- * @package Vulcan\Seo\Analysis
+ * @package QuinnInteractive\Seo\Analysis
  */
 abstract class Analysis
 {
     use Injectable, Configurable;
+
+    protected $domParser;
 
     /** @var \Page|PageHealthExtension */
     protected $page;
@@ -23,7 +25,12 @@ abstract class Analysis
     /** @var int The result, set after {@link inspect()} completes successfully */
     protected $result;
 
-    protected $domParser;
+    /**
+     * One of: default, danger, warning or success
+     *
+     * @var string
+     */
+    protected $resultLevel;
 
     /**
      * Allows you to hide certain levels (default, danger, success) from appearing in the content analysis.
@@ -43,13 +50,6 @@ abstract class Analysis
     ];
 
     /**
-     * One of: default, danger, warning or success
-     *
-     * @var string
-     */
-    protected $resultLevel;
-
-    /**
      * Analysis constructor.
      *
      * @param SiteTree $page
@@ -60,80 +60,23 @@ abstract class Analysis
     }
 
     /**
-     * @throws \InvalidArgumentException
+     * Fetches the rendered content from the dom parser. This is why it's important that your templates are semantically
+     * correct. `<div>` tags should be used for layout and positioning purposes and using `<p>` tags for content is
+     * semantically correct. Semantically correct pages tend to rank higher in search engines for various reasons (such
+     * as how effectively crawlers parse your website etc.).
      *
-     * @return ArrayData
+     * @return string
      */
-    public function inspect()
+    public function getContent()
     {
-        $result = $this->run();
-
-        if (!is_numeric($result)) {
-            throw new \InvalidArgumentException('Expected integer for response, got ' . gettype($result) . ' instead');
-        }
-        if (empty($responses = $this->responses())) {
-            throw new \InvalidArgumentException('Expected run() to return an integer, got ' . gettype($result) . ' instead');
+        $parser = $this->getRenderedHtmlDomParser();
+        $output = [];
+        foreach ($parser->find('p,h1,h2,h3,h4,h5') as $item) {
+            $output[] = strip_tags(html_entity_decode($item->innertext()));
         }
 
-        if (!isset($responses[$result])) {
-            throw new \InvalidArgumentException('Expected ' . $result . ' to be a key of the array that responses() returns, except the key ' . $result . ' does not exist');
-        }
-
-        if (count($responses[$result]) !== 2) {
-            throw new \InvalidArgumentException('Expected the response for result ' . $result . ' to be an array containing two items, first is the message, second is the indicator status: danger, warning, success, default');
-        }
-
-        if (!in_array($responses[$result][1], $this->config()->get('indicator_levels'))) {
-            throw new \InvalidArgumentException(sprintf('The specified indicator (%s) in the response for key %s is not a valid level, valid levels are: %s', $responses[$result][1], $result, implode(', ', $this->config()->get('indicator_levels'))));
-        }
-
-        $this->result = $result;
-        $this->resultLevel = $responses[$result][1];
-
-        return ArrayData::create([
-            'Analysis' => static::class,
-            'Result'   => $result,
-            'Response' => $responses[$result][0],
-            'Level'    => $this->resultLevel,
-            'Hidden'   => $this->resultLevel === 'hidden' ? true : in_array($this->resultLevel, $this->config()->get('hidden_levels'))
-        ]);
-    }
-
-
-    /**
-     * You must override this in your subclass and perform your own checks. An integer must be returned
-     * that references an index of the array you return in your response() method override in your subclass.
-     *
-     * @return int
-     */
-    public function run()
-    {
-        throw new \RuntimeException('You must override the run method in ' . static::class . ' and return an integer as a response that references a key in your array that your responses() override returns');
-    }
-
-    /**
-     * All analyses must override the `responses()` method to provide response messages and the response level (which
-     * is used for the indicator).
-     * `run()` should return an integer that matches a key in the array that `responses()` returns, for example if
-     * `run()` were to return `1`, then using the above example the message displayed would be `Hoorah!!! "Hello
-     * World!" appears in the page title` with a indicator level of `success`. The available indicator levels are:
-     * `default`, `danger`, `warning`, `success` which are grey, red, orange and green respectively.
-     *
-     * @return array
-     */
-    public function responses()
-    {
-        return [];
-    }
-
-    /**
-     * @param SiteTree $page
-     * @return $this
-     */
-    public function setPage(SiteTree $page)
-    {
-        $this->page = $page;
-        return $this;
+        $output = array_filter($output);
+        return implode(' ', $output);
     }
 
     /**
@@ -142,14 +85,6 @@ abstract class Analysis
     public function getPage()
     {
         return $this->page;
-    }
-
-    /**
-     * @return int
-     */
-    public function getResult()
-    {
-        return $this->result;
     }
 
     /**
@@ -171,22 +106,103 @@ abstract class Analysis
     }
 
     /**
-     * Fetches the rendered content from the dom parser. This is why it's important that your templates are semantically
-     * correct. `<div>` tags should be used for layout and positioning purposes and using `<p>` tags for content is
-     * semantically correct. Semantically correct pages tend to rank higher in search engines for various reasons (such
-     * as how effectively crawlers parse your website etc.).
-     *
-     * @return string
+     * @return int
      */
-    public function getContent()
+    public function getResult()
     {
-        $parser = $this->getRenderedHtmlDomParser();
-        $output = [];
-        foreach ($parser->find('p,h1,h2,h3,h4,h5') as $item) {
-            $output[] = strip_tags(html_entity_decode($item->innertext()));
-        }
+        return $this->result;
+    }
 
-        $output = array_filter($output);
-        return implode(' ', $output);
+    /**
+     * @throws \InvalidArgumentException
+     *
+     * @return ArrayData
+     */
+    public function inspect()
+    {
+        $result = $this->run();
+
+        if (!is_numeric($result)) {
+            throw new \InvalidArgumentException('Expected integer for response, got ' . gettype($result) . ' instead');
+        }
+        if (empty($responses = $this->responses())) {
+            throw new \InvalidArgumentException('Expected run() to return an integer, got '
+                . gettype($result)
+                . ' instead');
+        }
+        if (!isset($responses[$result])) {
+            throw new \InvalidArgumentException(sprintf(
+                'Expected %s to be a key of the array that responses() returns, except the key %s does not exist',
+                $result,
+                $result
+            ));
+        }
+        if (count($responses[$result]) !== 2) {
+            throw new \InvalidArgumentException(sprintf(
+                'Expected the response for result %s to be an array containing two items: ' .
+                'first is the message & second is the indicator status: danger, warning, success, default',
+                $result
+            ));
+        }
+        if (!in_array($responses[$result][1], $this->config()->get('indicator_levels'))) {
+            throw new \InvalidArgumentException(sprintf(
+                'The specified indicator (%s) in the response for key %s is not a valid level, valid levels are: %s',
+                $responses[$result][1],
+                $result,
+                implode(', ', $this->config()->get('indicator_levels'))
+            ));
+        }
+        $this->result      = $result;
+        $this->resultLevel = $responses[$result][1];
+
+        return ArrayData::create([
+            'Analysis' => static::class,
+            'Result'   => $result,
+            'Response' => $responses[$result][0],
+            'Level'    => $this->resultLevel,
+            'Hidden'   => $this->resultLevel === 'hidden'
+                ? true
+                : in_array($this->resultLevel, $this->config()->get('hidden_levels'))
+        ]);
+    }
+
+    /**
+     * All analyses must override the `responses()` method to provide response messages and the response level (which
+     * is used for the indicator).
+     * `run()` should return an integer that matches a key in the array that `responses()` returns, for example if
+     * `run()` were to return `1`, then using the above example the message displayed would be `Hoorah!!! "Hello
+     * World!" appears in the page title` with a indicator level of `success`. The available indicator levels are:
+     * `default`, `danger`, `warning`, `success` which are grey, red, orange and green respectively.
+     *
+     * @return array
+     */
+    public function responses()
+    {
+        return [];
+    }
+
+    /**
+     * You must override this in your subclass and perform your own checks. An integer must be returned
+     * that references an index of the array you return in your response() method override in your subclass.
+     *
+     * @return int
+     */
+    public function run()
+    {
+        throw new \RuntimeException(srintf(
+            'You must override the run method in %s and return an integer as a response that references '
+            . 'a key in your array that your responses() override returns',
+            static::class
+        ));
+    }
+
+    /**
+     * @param SiteTree $page
+     * @return $this
+     */
+    public function setPage(SiteTree $page)
+    {
+        $this->page = $page;
+        return $this;
     }
 }

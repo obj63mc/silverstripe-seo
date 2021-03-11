@@ -1,7 +1,8 @@
 <?php
 
-namespace Vulcan\Seo\Extensions;
+namespace QuinnInteractive\Seo\Extensions;
 
+use KubAT\PhpSimple\HtmlDomParser;
 use SilverStripe\CMS\Controllers\ModelAsController;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\ClassInfo;
@@ -9,7 +10,6 @@ use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\ToggleCompositeField;
 use SilverStripe\ORM\DataExtension;
-use KubAT\PhpSimple\HtmlDomParser;
 use Vulcan\Seo\Analysis\Analysis;
 use Vulcan\Seo\Forms\GoogleSearchPreview;
 use Vulcan\Seo\Forms\HealthAnalysisField;

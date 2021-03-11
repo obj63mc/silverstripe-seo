@@ -1,15 +1,14 @@
 ---
 Name: silverstripe-seo
 ---
-
 Page:
   extensions:
-    - Vulcan\Seo\Extensions\PageSeoExtension
+    - QuinnInteractive\Seo\Extensions\PageSeoExtension
 
 SilverStripe\SiteConfig\SiteConfig:
   extensions:
-    - Vulcan\Seo\Extensions\SiteConfigSettingsExtension
+    - QuinnInteractive\Seo\Extensions\SiteConfigSettingsExtension
 
 SilverStripe\Security\Member:
   extensions:
-    - Vulcan\Seo\Extensions\MemberExtension
+    - QuinnInteractive\Seo\Extensions\MemberExtension

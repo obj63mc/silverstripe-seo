@@ -1,17 +1,48 @@
 <?php
 
-namespace Vulcan\Seo\Analysis;
+namespace QuinnInteractive\Seo\Analysis;
 
-use Vulcan\Seo\Seo;
+use QuinnInteractive\Seo\Seo;
 
 /**
  * Class WordCountAnalysis
- * @package Vulcan\Seo\Analysis
+ * @package QuinnInteractive\Seo\Analysis
  */
 class WordCountAnalysis extends Analysis
 {
-    const WORD_COUNT_BELOW_MIN = 0;
     const WORD_COUNT_ABOVE_MIN = 1;
+    const WORD_COUNT_BELOW_MIN = 0;
+
+    /**
+     * @return int
+     */
+    public function getWordCount()
+    {
+        return count(array_filter(explode(' ', Seo::collateContentFields($this->getPage()))));
+    }
+
+    /**
+     * @return array
+     */
+    public function responses()
+    {
+        return [
+            static::WORD_COUNT_BELOW_MIN => [
+                sprintf(
+                    'The content of this page contains %s words which is less than the 300 recommended minimum',
+                    $this->getWordCount()
+                ),
+                'danger'
+            ],
+            static::WORD_COUNT_ABOVE_MIN => [
+                sprintf(
+                    'The content of this page contains %s words which is above the 300 recommended minimum',
+                    $this->getWordCount()
+                ),
+                'success'
+            ],
+        ];
+    }
 
     /**
      * You must override this in your subclass and perform your own checks. An integer must be returned
@@ -28,30 +59,5 @@ class WordCountAnalysis extends Analysis
         }
 
         return static::WORD_COUNT_ABOVE_MIN;
-    }
-
-    /**
-     * @return array
-     */
-    public function responses()
-    {
-        return [
-            static::WORD_COUNT_BELOW_MIN => [
-                'The content of this page contains ' . $this->getWordCount() . ' words which is less than the 300 recommended minimum',
-                'danger'
-            ],
-            static::WORD_COUNT_ABOVE_MIN => [
-                'The content of this page contains ' . $this->getWordCount() . ' which is above the 300 recommended minimum',
-                'success'
-            ],
-        ];
-    }
-
-    /**
-     * @return int
-     */
-    public function getWordCount()
-    {
-        return count(array_filter(explode(' ', Seo::collateContentFields($this->getPage()))));
     }
 }
