@@ -121,14 +121,6 @@ class PageSeoExtension extends DataExtension
         $fields->addFieldsToTab('Root.Main', TextareaField::create('StructuredData'), 'ExtraMeta');
 
         $fields->insertAfter('Metadata',
-            ToggleCompositeField::create('TwitterSeoComposite', 'Twitter SEO', [
-                TextField::create('TwitterPageTitle', 'Title')->setAttribute('placeholder', $this->getOwner()->Title)->setRightTitle('If blank, inherits default page title')->setTargetLength(45, 25, 70),
-                UploadField::create('TwitterPageImage', 'Image')->setRightTitle('Must be at least 280x150 pixels')->setFolderName('seo'),
-                TextareaField::create('TwitterPageDescription', 'Description')->setAttribute('placeholder', $this->getOwner()->MetaDescription ?: $this->getOwner()->dbObject('Content')->LimitCharacters(297))->setRightTitle('If blank, inherits meta description if it exists or gets the first 297 characters from content')->setTargetLength(200, 160, 320),
-            ])
-        );
-
-        $fields->insertAfter('Metadata',
             ToggleCompositeField::create('FacebookSeoComposite', 'Facebook SEO', [
                 DropdownField::create('FacebookPageType', 'Type', FacebookMetaGenerator::getValidTypes()),
                 TextField::create('FacebookPageTitle', 'Title')
