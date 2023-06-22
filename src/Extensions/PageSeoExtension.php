@@ -150,7 +150,9 @@ class PageSeoExtension extends DataExtension
                         : 'If blank, inherits meta description if it exists ' .
                         'or gets the first 297 characters from content')
                     ->setTargetLength(200, 160, 320),
-            ]),
+            ])
+        );
+        $fields->insertAfter('Metadata',
             ToggleCompositeField::create('TwitterSeoComposite', 'Twitter SEO', [
                 TextField::create('TwitterPageTitle', 'Title')
                     ->setAttribute('placeholder', $this->getOwner()->Title)
@@ -170,6 +172,5 @@ class PageSeoExtension extends DataExtension
             ])
         );
     }
-
 
 }
