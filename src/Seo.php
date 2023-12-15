@@ -90,7 +90,9 @@ class Seo
         $generator = TwitterMetaGenerator::create();
         $generator->setTitle($owner->TwitterPageTitle ?: $owner->Title);
         $generator->setDescription($owner->TwitterPageDescription ?: $owner->MetaDescription ?: $owner->Content);
-        if($owner->TwitterPageImage()->exists()){
+        if($owner->CustomShareImage){
+            $generator->setImageUrl($owner->CustomShareImage);
+        } else if($owner->TwitterPageImage()->exists()){
             $generator->setImageUrl($owner->TwitterPageImage()->AbsoluteLink());
         } else if($owner->FacebookPageImage()->exists()){
             $generator->setImageUrl($owner->FacebookPageImage()->AbsoluteLink());
@@ -124,7 +126,9 @@ class Seo
         $generator = FacebookMetaGenerator::create();
         $generator->setTitle($owner->FacebookPageTitle ?: $owner->Title);
         $generator->setDescription($owner->FacebookPageDescription ?: $owner->MetaDescription ?: $owner->Content);
-        if($owner->FacebookPageImage()->exists()){
+        if($owner->CustomShareImage){
+            $generator->setImageUrl($owner->CustomShareImage);
+        } else if($owner->FacebookPageImage()->exists()){
             $generator->setImageUrl($owner->FacebookPageImage()->AbsoluteLink());
         } else if($owner->TwitterPageImage()->exists()){
             $generator->setImageUrl($owner->TwitterPageImage()->AbsoluteLink());
