@@ -139,7 +139,11 @@ class Seo
         }
         $generator->setImageDimensions($imageWidth, $imageHeight);
         $generator->setType($owner->FacebookPageType ?: 'website');
-        $generator->setUrl($owner->AbsoluteLink());
+        if($owner->CustomShareURL){
+            $generator->setUrl($owner->CustomShareURL);
+        } else {
+            $generator->setUrl($owner->AbsoluteLink());
+        }
 
         return $generator->process();
     }
