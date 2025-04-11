@@ -8,12 +8,12 @@ use SilverStripe\AssetAdmin\Forms\UploadField;
 use SilverStripe\Assets\Image;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\Config\Configurable;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\Forms\ToggleCompositeField;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\Security\Member;
 use SilverStripe\Security\Security;
 use SilverStripe\SiteConfig\SiteConfig;
@@ -32,7 +32,7 @@ use SilverStripe\VersionedAdmin\Controllers\HistoryViewerController;
  * @method Image FacebookPageImage()
  * @method Member|MemberExtension Creator()
  */
-class PageSeoExtension extends DataExtension
+class PageSeoExtension extends Extension
 {
     use Configurable;
 
@@ -47,7 +47,8 @@ class PageSeoExtension extends DataExtension
         'FacebookPageDescription' => 'Text',
         'TwitterPageTitle'        => 'Varchar(255)',
         'TwitterPageDescription'  => 'Text',
-        'StructuredData' => 'HTMLText'
+        'StructuredData' => 'HTMLText',
+        'MetaTitle' => 'Varchar(255)'
     ];
 
     /**
@@ -80,7 +81,12 @@ class PageSeoExtension extends DataExtension
         $tags = explode(PHP_EOL, $tags);
 		for($i = 0; $i < count($tags); $i++){
 			if(($pos = strpos($tags[$i], '</title>')) !== false){
-				$tags[$i] = substr_replace($tags[$i], ' '.$siteConfig->TitleTagEnding, $pos, 0);
+                if($this->owner->MetaTitle){
+                    $start = strpos($tags[$i], '<title>') + 7;
+                    $tags[$i] = substr_replace($tags[$i], $this->owner->MetaTitle, $start, ($pos - $start));
+                } else {
+				    $tags[$i] = substr_replace($tags[$i], ' '.$siteConfig->TitleTagEnding, $pos, 0);
+                }
 				break;
 			}
 		}
@@ -100,8 +106,6 @@ class PageSeoExtension extends DataExtension
 
     public function onBeforeWrite()
     {
-        parent::onBeforeWrite();
-
         if (!$this->getOwner()->ID && !$this->getOwner()->Creator()->exists() && $member = Security::getCurrentUser()) {
             $this->getOwner()->CreatorID = $member->ID;
         }
@@ -110,14 +114,14 @@ class PageSeoExtension extends DataExtension
     /**
      * @param FieldList $fields
      */
-    public function updateCMSFields(FieldList $fields)
+    protected function updateCMSFields(FieldList $fields)
     {
-        parent::updateCMSFields($fields);
         $suppressMessaging = false;
         if (Controller::curr() instanceof HistoryViewerController) { // avoid cluttering the history comparison UI
             $suppressMessaging = true;
         }
 
+        $fields->addFieldsToTab('Root.Main', TextField::create('MetaTitle'), 'MetaDescription');
         $fields->addFieldsToTab('Root.Main', TextareaField::create('StructuredData'), 'ExtraMeta');
 
         $fields->insertAfter('Metadata',

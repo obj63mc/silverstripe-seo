@@ -6,10 +6,10 @@ use KubAT\PhpSimple\HtmlDomParser;
 use SilverStripe\CMS\Controllers\ModelAsController;
 use SilverStripe\Control\Controller;
 use SilverStripe\Core\ClassInfo;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\ToggleCompositeField;
-use SilverStripe\ORM\DataExtension;
 use Vulcan\Seo\Analysis\Analysis;
 use Vulcan\Seo\Forms\GoogleSearchPreview;
 use Vulcan\Seo\Forms\HealthAnalysisField;
@@ -20,7 +20,7 @@ use Vulcan\Seo\Forms\HealthAnalysisField;
  *
  * @property string FocusKeyword
  */
-class PageHealthExtension extends DataExtension
+class PageHealthExtension extends Extension
 {
     /**
      * @var string|null
@@ -34,10 +34,8 @@ class PageHealthExtension extends DataExtension
     /**
      * @param FieldList $fields
      */
-    public function updateCMSFields(FieldList $fields)
+    protected function updateCMSFields(FieldList $fields)
     {
-        parent::updateCMSFields($fields);
-
         if ($this->owner instanceof \SilverStripe\ErrorPage\ErrorPage) {
             return;
         }
