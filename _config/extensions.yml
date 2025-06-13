@@ -12,3 +12,15 @@ SilverStripe\Security\Member:
     - QuinnInteractive\Seo\Extensions\MemberExtension
 SilverStripe\Control\Controller:
   add_trailing_slash: true
+---
+Name: silverstripe-seo-trailingslashredirector
+After:
+  - requestprocessors
+---
+SilverStripe\Core\Injector\Injector:
+  TrailingSlashRedirector:
+    class: QuinnInteractive\Seo\Middleware\TrailingSlashRedirector
+  SilverStripe\Control\Director:
+    properties:
+      Middlewares:
+        CustomMiddleware: '%$TrailingSlashRedirector'
