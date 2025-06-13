@@ -4,11 +4,11 @@ Name: silverstripe-seo
 Page:
   extensions:
     - QuinnInteractive\Seo\Extensions\PageSeoExtension
-
 SilverStripe\SiteConfig\SiteConfig:
   extensions:
     - QuinnInteractive\Seo\Extensions\SiteConfigSettingsExtension
-
 SilverStripe\Security\Member:
   extensions:
     - QuinnInteractive\Seo\Extensions\MemberExtension
+SilverStripe\Control\Controller:
+  add_trailing_slash: true
