@@ -4,8 +4,6 @@ namespace QuinnInteractive\Seo\Extensions;
 
 use SilverStripe\Core\Extension;
 
-use SilverStripe\Forms\FieldList;
-
 /**
  * Class MemberExtension
  * @package QuinnInteractive\Seo\Extensions
