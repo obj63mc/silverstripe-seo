@@ -123,7 +123,15 @@ class PageSeoExtension extends Extension
 
         $fields->addFieldToTab('Root.Main', TextField::create('MetaTitle'), 'MetaDescription');
         $fields->addFieldToTab('Root.Main', TextareaField::create('StructuredData'), 'ExtraMeta');
-
+        $fields->removeByName('FacebookPageType');
+        $fields->removeByName('FacebookPageTitle');
+        $fields->removeByName('FacebookPageImage');
+        $fields->removeByName('FacebookPageDescription');
+        $fields->removeByName('TwitterPageTitle');
+        $fields->removeByName('TwitterPageImage');
+        $fields->removeByName('TwitterPageDescription');
+        $fields->removeByName('Creator');
+        $fields->removeByName('CreatorID');
         $fields->insertAfter('Metadata',
             ToggleCompositeField::create('FacebookSeoComposite', 'Facebook SEO', [
                 DropdownField::create('FacebookPageType', 'Type', FacebookMetaGenerator::getValidTypes()),
