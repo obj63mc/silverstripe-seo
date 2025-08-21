@@ -121,8 +121,8 @@ class PageSeoExtension extends Extension
             $suppressMessaging = true;
         }
 
-        $fields->addFieldsToTab('Root.Main', TextField::create('MetaTitle'), 'MetaDescription');
-        $fields->addFieldsToTab('Root.Main', TextareaField::create('StructuredData'), 'ExtraMeta');
+        $fields->addFieldToTab('Root.Main', TextField::create('MetaTitle'), 'MetaDescription');
+        $fields->addFieldToTab('Root.Main', TextareaField::create('StructuredData'), 'ExtraMeta');
 
         $fields->insertAfter('Metadata',
             ToggleCompositeField::create('FacebookSeoComposite', 'Facebook SEO', [
