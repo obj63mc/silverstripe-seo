@@ -75,7 +75,7 @@ class PageSeoExtension extends Extension
      *
      * @param $tags
      */
-    public function MetaTags(&$tags)
+    public function updateMetaTags(&$tags)
     {
         $siteConfig = SiteConfig::current_site_config();
         $tags = explode(PHP_EOL, $tags);
